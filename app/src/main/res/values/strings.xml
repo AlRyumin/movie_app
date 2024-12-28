@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">MovieApp</string>
+    <string name="tab_title_films">Films</string>
+    <string name="tab_title_favorites">Favorites</string>
+
+    <string name="unknown_error">Something went wrong</string>
 </resources>

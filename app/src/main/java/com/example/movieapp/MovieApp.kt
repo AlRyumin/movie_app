@@ -6,7 +6,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.example.movieapp.ui.screen.HomeScreen
+import com.example.movieapp.ui.screen.MainScreen
 
 @Composable
 fun MovieApp() {
@@ -14,7 +14,7 @@ fun MovieApp() {
         Surface(
             modifier = Modifier.padding(innerPadding),
         ) {
-            HomeScreen()
+            MainScreen()
         }
     }
 }
