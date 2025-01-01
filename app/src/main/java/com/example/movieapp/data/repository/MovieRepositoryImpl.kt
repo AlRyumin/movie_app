@@ -36,4 +36,12 @@ class MovieRepositoryImpl @Inject constructor(
             return Result.failure(exception = e)
         }
     }
+
+    override suspend fun addToFavorites(movie: Movie) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun removeFromFavorites(id: Int) {
+        TODO("Not yet implemented")
+    }
 }

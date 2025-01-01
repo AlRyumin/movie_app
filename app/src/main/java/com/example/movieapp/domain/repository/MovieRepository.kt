@@ -9,4 +9,8 @@ interface MovieRepository {
     val favoriteMovies: Flow<List<Movie>>
 
     suspend fun fetch(page: Int? = 0): Result<List<Movie>>
+
+    suspend fun addToFavorites(movie: Movie)
+
+    suspend fun removeFromFavorites(id: Int)
 }
