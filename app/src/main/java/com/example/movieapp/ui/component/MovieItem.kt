@@ -1,5 +1,6 @@
 package com.example.movieapp.ui.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +30,7 @@ import com.example.movieapp.domain.model.Movie
 @Composable
 fun MovieItem(
     movie: Movie,
+    toggleIsFavorite: (movie: Movie) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -93,9 +95,11 @@ fun MovieItem(
                     horizontalArrangement = Arrangement.End,
                 ) {
                     Text(
-                        modifier = Modifier.padding(end = 16.dp),
+                        modifier = Modifier.padding(end = 16.dp).clickable {
+                            toggleIsFavorite(movie)
+                        },
                         color = MaterialTheme.colorScheme.primary,
-                        text = "LIKE",
+                        text = if(movie.isFavorite) "REMOVE" else "LIKE",
                     )
 
                     Text(

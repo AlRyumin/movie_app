@@ -15,17 +15,27 @@ class LocalDataSourceImpl @Inject constructor(
         MovieEntityToMovie.mapAll(it)
     }
 
+    override suspend fun getMovie(id: Int): Movie? {
+        val movieEntity = dao.getMovie(id)
+        return if (movieEntity != null)
+            MovieEntityToMovie.mapFrom(movieEntity)
+        else null
+    }
+
+
     override suspend fun insertAll(movies: List<Movie>) {
         dao.insertAll(MovieToMovieEntity.mapAll(movies))
     }
 
-    override fun getFavorites(): Flow<List<Movie>> = getAll()
+    override suspend fun getFavorites(): List<Movie> =
+        MovieEntityToMovie.mapAll(dao.getFavorites())
+
 
     override suspend fun addToFavorites(movie: Movie) {
-        TODO("Not yet implemented")
+        dao.insert(MovieToMovieEntity.mapFrom(movie.copy(isFavorite = true)))
     }
 
-    override suspend fun removeFromFavorites(movie: Movie) {
-        TODO("Not yet implemented")
+    override suspend fun removeFromFavorites(id: Int) {
+        dao.delete(id)
     }
 }

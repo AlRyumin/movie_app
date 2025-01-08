@@ -21,6 +21,7 @@ object MovieEntityToMovie : Mapper<MovieEntity, Movie> {
             video = from.video,
             voteAverage = from.voteAverage,
             voteCount = from.voteCount,
+            isFavorite = from.isFavorite,
         )
     }
 }

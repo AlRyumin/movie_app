@@ -29,12 +29,14 @@ import androidx.compose.ui.unit.dp
 import com.example.movieapp.domain.model.Movie
 import com.example.movieapp.ui.screen.home.ContentState
 import com.example.movieapp.ui.utils.isScrolledToEnd
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieList(
     contentState: ContentState<Map<String, List<Movie>>>,
     modifier: Modifier = Modifier,
+    toggleIsFavorite: (movie: Movie) -> Unit,
 ) {
     val listState = rememberLazyListState()
 
@@ -43,6 +45,8 @@ fun MovieList(
             listState.isScrolledToEnd()
         }
     }
+
+    Timber.i("contentState.data -> ${contentState.data}")
 
     LaunchedEffect(isAtBottom) {
         if (isAtBottom) {
@@ -67,7 +71,11 @@ fun MovieList(
                     MovieHeader(title = monthYear)
                 }
                 items(movieList) { movie ->
-                    MovieItem(movie = movie, modifier = Modifier.padding(horizontal = 16.dp))
+                    MovieItem(
+                        movie = movie,
+                        toggleIsFavorite = toggleIsFavorite,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
                     VerticalDivider(modifier = Modifier.height(8.dp))
                 }
             }

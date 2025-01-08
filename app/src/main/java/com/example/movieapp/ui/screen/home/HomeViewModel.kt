@@ -4,18 +4,25 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapp.base.utils.GroupMoviesByMonth
 import com.example.movieapp.domain.model.Movie
+import com.example.movieapp.domain.usecase.AddToFavoriteUseCase
+import com.example.movieapp.domain.usecase.CheckIsFavoriteUseCase
 import com.example.movieapp.domain.usecase.FetchMoviesUseCase
+import com.example.movieapp.domain.usecase.RemoveFromFavoritesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val fetchMoviesUseCase: FetchMoviesUseCase,
+    private val checkIfFavorite: CheckIsFavoriteUseCase,
+    private val addToFavorite: AddToFavoriteUseCase,
+    private val removeFromFavorite: RemoveFromFavoritesUseCase,
 ) : ViewModel() {
     private val _uiState =
         MutableStateFlow<HomeUiState<Map<String, List<Movie>>>>(HomeUiState.Loading)
@@ -59,6 +66,38 @@ class HomeViewModel @Inject constructor(
     fun loadMovies() {
         _uiState.value = HomeUiState.Loading
         fetchMovies()
+    }
+
+    fun toggleFavorite(movie: Movie) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val isFavorite = checkIfFavorite(movie.id)
+
+            if (isFavorite) {
+                removeFromFavorite(movie)
+            } else {
+                addToFavorite(movie)
+            }
+
+            _movies.update { currentMovies ->
+                currentMovies.map { currentMovie ->
+                    if (currentMovie.id == movie.id) {
+                        currentMovie.copy(isFavorite = !isFavorite) // Toggle favorite status
+                    } else {
+                        currentMovie
+                    }
+                }
+            }
+
+            _uiState.update {
+                HomeUiState.Content(
+                    ContentState(
+                        data = GroupMoviesByMonth(_movies.value),
+                        refresh = { refreshMovies() },
+                        loadMore = { loadMore() },
+                    )
+                )
+            }
+        }
     }
 
     private fun refreshMovies() {

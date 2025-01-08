@@ -40,7 +40,11 @@ fun HomeScreen(
             }
 
             is HomeUiState.Content -> {
-                MovieList((uiState as HomeUiState.Content<Map<String, List<Movie>>>).contentState)
+                MovieList(
+                    contentState = (uiState as HomeUiState.Content<Map<String, List<Movie>>>).contentState,
+                ) { movie ->
+                    viewModel.toggleFavorite(movie)
+                }
             }
         }
     }

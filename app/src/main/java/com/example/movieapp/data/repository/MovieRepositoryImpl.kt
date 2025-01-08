@@ -4,24 +4,46 @@ import com.example.movieapp.data.source.local.LocalDataSource
 import com.example.movieapp.data.source.remote.RemoteDataSource
 import com.example.movieapp.domain.model.Movie
 import com.example.movieapp.domain.repository.MovieRepository
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class MovieRepositoryImpl @Inject constructor(
     private val localDataSource: LocalDataSource,
     private val remoteDataSource: RemoteDataSource,
 ) : MovieRepository {
-    override val movies: Flow<List<Movie>>
-        get() = localDataSource.getAll()
+    override suspend fun getFavorites(): List<Movie> = localDataSource.getFavorites()
 
-    override val favoriteMovies: Flow<List<Movie>>
-        get() = localDataSource.getAll()
+    override suspend fun getMovie(id: Int): Movie? =
+        localDataSource.getMovie(id)
+
+    fun mergeMovies(remote: List<Movie>, local: List<Movie>): List<Movie> {
+        // Create a map from the local list for quick lookup
+        val localMap = local.associateBy { it.id }
+
+        // Merge the two lists
+        val mergedList = remote.map { remoteMovie ->
+            // Check if the movie exists in the local map
+            val localMovie = localMap[remoteMovie.id]
+            // If it exists, prioritize the isFavorite value from the local movie
+            if (localMovie != null) {
+                remoteMovie.copy(isFavorite = localMovie.isFavorite)
+            } else {
+                remoteMovie
+            }
+        }.toMutableList()
+
+        // Add any movies that are in local but not in remote
+        val remoteIds = remote.map { it.id }.toSet()
+        mergedList += local.filter { it.id !in remoteIds }
+
+        return mergedList
+    }
 
     override suspend fun fetch(page: Int?): Result<List<Movie>> {
         try {
 
             return remoteDataSource.getMovies(page).fold(
-                onSuccess = { movies ->
+                onSuccess = { remoteMovies ->
+                    val movies = mergeMovies(remoteMovies, getFavorites())
                     if (page == null) {
                         localDataSource.insertAll(movies)
                     }
@@ -38,10 +60,10 @@ class MovieRepositoryImpl @Inject constructor(
     }
 
     override suspend fun addToFavorites(movie: Movie) {
-        TODO("Not yet implemented")
+        localDataSource.addToFavorites(movie)
     }
 
     override suspend fun removeFromFavorites(id: Int) {
-        TODO("Not yet implemented")
+        localDataSource.removeFromFavorites(id)
     }
 }

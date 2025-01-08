@@ -5,12 +5,11 @@ import androidx.room.TypeConverter
 class GenreIdsConverter {
     @TypeConverter
     fun genreIdsToList(genreIdsStr: String): List<Int> {
-        val s = genreIdsStr.replace("(", "").replace(")", "")
-        val list = s.split(",")
-        val genreIds: List<Int> = list.map { it.toInt() }
-        return genreIds
+        return genreIdsStr.split(",").map { it.trim().toInt() }
     }
 
     @TypeConverter
-    fun listToGenreIds(genreIds: List<Int>) = genreIds.toString()
+    fun listToGenreIds(genreIds: List<Int>): String {
+        return genreIds.joinToString(separator = ",")
+    }
 }
